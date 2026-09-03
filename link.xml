@@ -1,0 +1,4 @@
+<linker>
+  <!-- CoffeeBean.Build：纯 C# 注入引擎（构建期 Editor 工具，保留以防反射/序列化裁剪） -->
+  <assembly fullname="CoffeeBean.Build" preserve="all" />
+</linker>

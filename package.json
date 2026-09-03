@@ -1,0 +1,22 @@
+{
+  "name": "com.coffeebean.build",
+  "version": "0.1.0",
+  "displayName": "CoffeeBean Build",
+  "description": "Native export customization for CoffeeBean: post-process Android Studio (Gradle) & iOS (Xcode) project exports — AndroidManifest / gradle / gradle.properties / libs / res / env injection for Android; Info.plist / frameworks & libs / Build Settings / capabilities / file targets for iOS. Pure-C# injectors (EditMode testable) + thin Unity callback adapters; idempotent; dry-run; config via ScriptableObject/JSON/code steps.",
+  "unity": "6000.0",
+  "author": {
+    "name": "Herschy0829"
+  },
+  "keywords": ["coffeebean", "build", "android", "ios", "xcode", "gradle", "postprocess", "export", "androidmanifest", "plist"],
+  "dependencies": {
+    "com.coffeebean.tools": "0.5.0"
+  },
+  "testables": ["com.coffeebean.build"],
+  "samples": [
+    {
+      "displayName": "Native Export Demo",
+      "description": "原生导出定制示例：最小配置资产 + fake 导出目录 dry-run 演练（AndroidManifest 权限 / gradle 依赖 / plist 权限文案 / framework 计划）。",
+      "path": "Samples~/NativeExportDemo"
+    }
+  ]
+}
