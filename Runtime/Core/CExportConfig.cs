@@ -42,7 +42,40 @@ namespace CoffeeBean
         }
     }
 
-    /// <summary>Android 段配置（Manifest / gradle / properties / libs / res / env）。</summary>
+    /// <summary>
+    /// Google Play Asset Delivery（PAD）asset pack 配置：超 Google Play 大小限制（150MB 档）时，
+    /// 把大资源拆成独立 asset pack（install-time / fast-follow / on-demand）。
+    /// </summary>
+    [Serializable]
+    public sealed class CAndroidAssetPackConfig
+    {
+        /// <summary>pack 名（目录名 + packName；小写字母数字下划线，如 "hd_assets"）。</summary>
+        public string name;
+
+        /// <summary>投放类型：install-time / fast-follow / on-demand（默认 install-time）。</summary>
+        public string deliveryType = "install-time";
+
+        /// <summary>
+        /// 源资源目录（Assets/... 相对 Unity 工程根，或绝对路径）。
+        /// 每个目录的**内容**被拷贝进 pack 的 src/main/assets/ 根。
+        /// </summary>
+        public List<string> sourceFolders = new List<string>();
+
+        public CAndroidAssetPackConfig() { }
+
+        public CAndroidAssetPackConfig(string name, string deliveryType = "install-time")
+        {
+            this.name = name;
+            this.deliveryType = deliveryType;
+        }
+
+        /// <summary>是否非 install-time（需要 Play Core 运行时下载）。</summary>
+        public bool NeedsPlayCore =>
+            deliveryType != null &&
+            !deliveryType.Equals("install-time", StringComparison.OrdinalIgnoreCase);
+    }
+
+    /// <summary>Android 段配置（Manifest / gradle / properties / libs / res / env / asset packs）。</summary>
     [Serializable]
     public sealed class CExportAndroidConfig
     {
@@ -96,6 +129,9 @@ namespace CoffeeBean
 
         /// <summary>环境策略：warn（默认，缺 SDK/NDK/JDK 仅警告）/ abort（缺则中止）。</summary>
         public string envPolicy = "warn";
+
+        /// <summary>Google Play Asset Delivery asset packs（超 150MB 分包）。</summary>
+        public List<CAndroidAssetPackConfig> assetPacks = new List<CAndroidAssetPackConfig>();
     }
 
     /// <summary>iOS 段配置（plist / frameworks / build settings / capabilities）。</summary>

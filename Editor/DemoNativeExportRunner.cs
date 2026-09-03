@@ -17,10 +17,19 @@ namespace CoffeeBean.EditorTools
         public static string RunDemo(CExportPlatform platform)
         {
             string dir = Path.Combine(Path.GetTempPath(), "CoffeeBeanExportDemo_" + Guid.NewGuid().ToString("N"));
+            string srcDir = Path.Combine(Path.GetTempPath(), "CoffeeBeanExportDemoRes_" + Guid.NewGuid().ToString("N"));
             try
             {
                 BuildFakeExport(dir, platform);
                 var config = CreateDemoConfig(platform);
+                // Android 演示附 PAD asset pack：临时源资源目录 → install-time pack "demo_hd"
+                if (platform == CExportPlatform.Android)
+                {
+                    Directory.CreateDirectory(srcDir);
+                    File.WriteAllText(Path.Combine(srcDir, "hd_texture.bin"), "fake-hd-resource");
+                    config.android.assetPacks.Add(new CAndroidAssetPackConfig("demo_hd", "install-time"));
+                    config.android.assetPacks[0].sourceFolders.Add(srcDir);
+                }
                 var session = new CExportSession(platform, dir, config)
                 {
                     ProjectRoot = Application.dataPath != null ? Path.GetDirectoryName(Application.dataPath) : null,
@@ -34,6 +43,7 @@ namespace CoffeeBean.EditorTools
             finally
             {
                 try { Directory.Delete(dir, true); } catch { /* 忽略清理失败 */ }
+                try { Directory.Delete(srcDir, true); } catch { /* 忽略清理失败 */ }
             }
         }
 
@@ -51,6 +61,8 @@ namespace CoffeeBean.EditorTools
                 File.WriteAllText(Path.Combine(root, "unityLibrary", "build.gradle"),
                     "apply plugin: 'com.android.library'\n\ndependencies {\n    implementation fileTree(dir: 'libs', include: ['*.jar'])\n}\n");
                 File.WriteAllText(Path.Combine(root, "gradle.properties"), "org.gradle.jvmargs=-Xmx1024m\n");
+                File.WriteAllText(Path.Combine(root, "settings.gradle"),
+                    "pluginManagement { repositories { google() } }\ninclude ':launcher'\ninclude ':unityLibrary'\n");
                 File.WriteAllText(Path.Combine(root, "unityLibrary", "src", "main", "res", "values", "strings.xml"),
                     "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<resources>\n</resources>\n");
             }

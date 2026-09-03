@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.1.1] - 2026-09-03
+
+### Added
+- **Google Play 150MB AAB 分包（Play Asset Delivery asset packs）**：`CExportAndroidConfig.assetPacks` 配置
+  （name / deliveryType：install-time|fast-follow|on-demand / sourceFolders）
+- **`CAndroidAssetPacksStep`**（导出后处理，幂等 + dry-run）：为每个 pack 生成
+  `<pack>/build.gradle`（`com.android.asset-pack` 插件）、`<pack>/src/main/AndroidManifest.xml`
+  （package = 应用包名 `.assetpacks.<pack>`）、源目录内容拷贝进 `src/main/assets`；
+  `settings.gradle` 追加 `include ':<pack>'`（去重）；存在非 install-time pack 时自动向
+  `unityLibrary/build.gradle` 注入 `com.google.android.play:core:1.10.3`
+- EditMode 测试 5 个（pack 生成物期望断言 / install-time 不加 Play Core / on-demand 加 Play Core 且幂等 /
+  资源递归拷贝去重 / settings include 幂等 / dry-run 零产物）；Sample dry-run 演示附 asset pack
+
 ## [0.1.0] - 2026-09-03
 
 ### Added

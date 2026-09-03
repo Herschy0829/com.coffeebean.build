@@ -1,9 +1,9 @@
-#if COFFEEBEAN_CORE
+﻿#if COFFEEBEAN_CORE
 using CoffeeBean;
 
 [assembly: CoffeeBeanModule(
     "com.coffeebean.build",
-    "0.1.0",
+    "0.1.1",
     DisplayName = "Build",
     Description = "Native export customization: Android Studio (Gradle) & iOS (Xcode) project post-process injection (manifest/plist/gradle/frameworks).",
     Dependencies = new[] { "com.coffeebean.core", "com.coffeebean.tools" }

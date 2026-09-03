@@ -71,6 +71,7 @@ namespace CoffeeBean
                 yield return new CAndroidPropertiesStep();
                 yield return new CAndroidLibsStep();
                 yield return new CAndroidResStep();
+                yield return new CAndroidAssetPacksStep();
                 yield return new CAndroidEnvStep();
             }
             else
