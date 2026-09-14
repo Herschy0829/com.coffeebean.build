@@ -1,4 +1,4 @@
-﻿# CoffeeBean Build
+# CoffeeBean Build
 
 CoffeeBean 原生导出定制模块：处理 **Android Studio（Gradle）工程** 与 **iOS（Xcode）工程** 导出后的定制注入。
 基于 Unity 构建回调在导出后立即执行注入，纯 C# 注入引擎（EditMode 可测），Unity API 只在薄适配层。
@@ -33,7 +33,7 @@ CoffeeBean 原生导出定制模块：处理 **Android Studio（Gradle）工程*
 // Packages/manifest.json
 {
   "dependencies": {
-    "com.coffeebean.build": "https://github.com/Herschy0829/com.coffeebean.build.git#v0.1.1"
+    "com.coffeebean.build": "https://github.com/Herschy0829/com.coffeebean.build.git#v0.1.2"
   }
 }
 ```

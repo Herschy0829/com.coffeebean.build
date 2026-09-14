@@ -28,16 +28,20 @@ namespace CoffeeBean
                 }
                 if (s.DryRun) { s.Log.Step(Id, $"dry-run：将注入 {path}"); any = true; continue; }
 
+                // 每份 manifest 独立判定是否需要保存：早期版本把 any 当作"本次是否有改动"复用，
+                // 导致第一份有改动后，后续 manifest 即使零改动也会被 Save()（无谓重排格式、产生 diff）。
+                bool changed = false;
                 foreach (var p in cfg.permissions)
-                    if (manifest.EnsurePermission(p)) { s.Log.Step(Id, $"permission +{p}"); s.MarkApplied($"manifest:perm:{p}"); any = true; }
+                    if (manifest.EnsurePermission(p)) { s.Log.Step(Id, $"permission +{p}"); s.MarkApplied($"manifest:perm:{p}"); changed = true; }
                 foreach (var f in cfg.usesFeatures)
-                    if (manifest.EnsureUsesFeature(f)) { s.Log.Step(Id, $"uses-feature +{f}"); s.MarkApplied($"manifest:feature:{f}"); any = true; }
+                    if (manifest.EnsureUsesFeature(f)) { s.Log.Step(Id, $"uses-feature +{f}"); s.MarkApplied($"manifest:feature:{f}"); changed = true; }
                 foreach (var kv in cfg.applicationMetaData)
-                    if (manifest.EnsureApplicationMetaData(kv.key, kv.value)) { s.Log.Step(Id, $"meta-data {kv.key}={kv.value}"); s.MarkApplied($"manifest:meta:{kv.key}"); any = true; }
+                    if (manifest.EnsureApplicationMetaData(kv.key, kv.value)) { s.Log.Step(Id, $"meta-data {kv.key}={kv.value}"); s.MarkApplied($"manifest:meta:{kv.key}"); changed = true; }
                 foreach (var kv in cfg.applicationAttributes)
-                    if (manifest.SetApplicationAttribute(kv.key, kv.value)) { s.Log.Step(Id, $"application[{kv.key}]={kv.value}"); s.MarkApplied($"manifest:appattr:{kv.key}"); any = true; }
+                    if (manifest.SetApplicationAttribute(kv.key, kv.value)) { s.Log.Step(Id, $"application[{kv.key}]={kv.value}"); s.MarkApplied($"manifest:appattr:{kv.key}"); changed = true; }
 
-                if (any) manifest.Save();
+                if (changed) manifest.Save();
+                any |= changed;
             }
             if (!any && !s.DryRun) s.Log.Warn(Id + ": 无 manifest 被修改（检查 manifestTarget 与路径）");
         }

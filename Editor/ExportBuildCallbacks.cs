@@ -55,7 +55,7 @@ namespace CoffeeBean.EditorTools
                     if (platform == CExportPlatform.IOS)
                     {
 #if UNITY_IOS
-                        int n = CiOSXcodeAdapter.Apply(session.IosPlan, exportRoot, session.Log);
+                        int n = CiOSXcodeAdapter.Apply(session.IosPlan, exportRoot, session.ProjectRoot, session.Log);
                         session.Log.Step("ios.xcode", $"PBX 落盘完成（{n} 项）");
 #else
                         session.Log.Warn("ios.xcode: 非 iOS 平台编辑器，跳过 PBX 落盘（plist 注入已完成）。");

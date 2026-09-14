@@ -60,6 +60,41 @@ namespace CoffeeBean.Build.Tests
         }
 
         [Test]
+        public void Step_BothManifests_SavesOnlyTheChangedFile()
+        {
+            // launcher 缺 ACCESS_NETWORK_STATE → 本次会被注入并保存
+            WriteLauncherManifest();
+
+            // unityLibrary 已含该权限，且刻意用 2 空格缩进 + CRLF：一旦被 Save() 就会被
+            // 规范化成 4 空格 + LF，从而暴露"无改动却被重写"
+            const string unityRaw =
+                "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n" +
+                "<manifest xmlns:android=\"http://schemas.android.com/apk/res/android\">\r\n" +
+                "  <uses-permission android:name=\"android.permission.ACCESS_NETWORK_STATE\" />\r\n" +
+                "  <application>\r\n" +
+                "  </application>\r\n" +
+                "</manifest>\r\n";
+            WriteFile("unityLibrary/src/main/AndroidManifest.xml", unityRaw);
+
+            var cfg = new CExportConfig { enable = true };
+            cfg.android.manifestTarget = "both";
+            cfg.android.permissions.Add("android.permission.ACCESS_NETWORK_STATE");
+
+            var session = new CExportSession(CExportPlatform.Android, Root, cfg);
+            new CAndroidManifestStep().Execute(session);
+
+            // 第一份被正确注入
+            StringAssert.Contains("android.permission.ACCESS_NETWORK_STATE",
+                ReadFile("launcher/src/main/AndroidManifest.xml"));
+
+            // 第二份零改动 → 必须逐字节保持原样
+            // 回归点：早期实现把 any 同时当作"本文件是否有改动"，导致第一份改动后
+            // 第二份也被 Save()，产生无谓的格式重排 diff（削弱幂等承诺）。
+            Assert.AreEqual(unityRaw, ReadFile("unityLibrary/src/main/AndroidManifest.xml"),
+                "零改动的 manifest 不应被重写");
+        }
+
+        [Test]
         public void ExpectedArtifact_ManifestInjections()
         {
             WriteLauncherManifest();

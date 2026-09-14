@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.1.2] - 2026-09-14
+
+### Fixed
+- **iOS PBX 落盘路径无法编译（CS1501）**：`ExportBuildCallbacks` 调用 `CiOSXcodeAdapter.Apply` 时漏传
+  `projectRoot`（3 实参 vs 4 形参）。该调用位于 `#if UNITY_IOS` 内，在 Windows / 非 iOS 编辑器下不参与编译，
+  因此长期未被发现 —— 意味着 iOS 侧的 framework / 本地库 / BuildSettings / Capability 落盘在此前**从未在
+  iOS 目标下编译通过**。现补传 `session.ProjectRoot`（`ResolveSource` 正是用它把 `Assets/...` 解析为绝对路径）。
+- **`CAndroidManifestStep` 复用 `any` 导致零改动的 manifest 被重写**：`bool any` 同时充当“本文件是否有改动”
+  与“本次是否注入过”两种语义，第一份 manifest 有改动后，后续 manifest 即使零改动也会执行 `Save()`，
+  产生无谓的格式重排 diff，削弱了模块承诺的幂等性。改为按文件独立判定 `changed`，再用 `any |= changed`
+  汇总。
+
+### Added
+- 回归测试 `CAndroidManifestTests.Step_BothManifests_SavesOnlyTheChangedFile`：同一轮注入中
+  第一份 manifest 需改动、第二份零改动，断言后者逐字节保持原样。已验证该测试在修复前失败、修复后通过。
+
 ## [0.1.1] - 2026-09-03
 
 ### Added
