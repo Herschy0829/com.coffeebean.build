@@ -117,7 +117,7 @@ namespace CoffeeBean
             return true;
         }
 
-        /// <summary>确保 application 下存在 &lt;meta-data android:name&gt;；同 key 覆盖值。</summary>
+        /// <summary>确保 application 下存在 &lt;meta-data android:name&gt;；同 key 覆盖值（值相同则视为无变化）。</summary>
         public bool EnsureApplicationMetaData(string key, string value)
         {
             if (string.IsNullOrEmpty(key)) return false;
@@ -128,6 +128,10 @@ namespace CoffeeBean
                 if (e.LocalName != "meta-data") continue;
                 if (GetAndroidAttr(e, "name") == key)
                 {
+                    // 必须比较后再返回：早期实现无条件 return true，导致"同 key 同值"的重复导出
+                    // 也被判定为有改动 → manifest 每次导出都被重写（无谓的格式重排 diff），
+                    // 直接破坏了模块承诺的幂等性。语义与 SetApplicationAttribute 对齐。
+                    if (GetAndroidAttr(e, "value") == value) return false; // 值未变：无改动
                     SetAndroidAttr(e, "value", value);
                     return true; // 覆盖
                 }

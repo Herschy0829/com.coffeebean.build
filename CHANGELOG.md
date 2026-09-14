@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.2.0] - 2026-09-14
+
+### Fixed
+- **`CAndroidManifest.EnsureApplicationMetaData` 破坏幂等性**：同 key 覆盖时**无条件 `return true`**
+  （不像 `SetApplicationAttribute` 会先比较 `existing != value`）。于是"同 key **同值**"的重复导出
+  也被判定为"有改动" → `manifest.Save()` 每次导出都执行 → 每次都产生无谓的格式重排 diff，
+  直接违背模块承诺的"幂等（重复导出零改动）"。
+  这个 bug 是给下面的"应用注入 N 项"日志补测试时**被测试抓出来的** —— 幂等重跑仍报告"应用注入 1 项"。
+  现已改为先比较值，相同则返回 false。（已确认其余注入器无同类问题：`CAndroidRes` 的两个方法
+  都先比较再计入改动，只在有变化时才写盘。）
+
+### Removed (BREAKING)
+- **`CExportSession.WasApplied(string)`**（死方法）：公开方法但**全代码库零调用点**。
+  它读的是 `AppliedKeys`（**单次会话**的审计集合），名字却容易被误解为"跨次幂等的依据" ——
+  实际上"重复导出零改动"完全由各注入器的**文件内容比对**保证，与这张表无关。
+  移除该方法；数据本身没浪费：新增内部 `AppliedCount`，由 `CExportRunner` 在完成日志里输出。
+
+### Added
+- 完成日志新增摘要：`应用注入 N 项（完全幂等：本次无改动）` —— `N == 0` 表示本次导出没有任何改动，
+  CI 可直接从 `CoffeeBeanExport.log` 判读幂等性，不必再逐文件比对。
+
 ## [0.1.2] - 2026-09-14
 
 ### Fixed

@@ -34,6 +34,13 @@ namespace CoffeeBean
         /// <summary>幂等签名表：已注入内容（节点 key / 行 hash / 库名 / 文件目标）。</summary>
         internal readonly HashSet<string> AppliedKeys = new HashSet<string>(StringComparer.Ordinal);
 
+        /// <summary>
+        /// 本次会话已应用的注入项数（诊断用）。
+        /// 注意：**跨次幂等并不依赖这张表** —— 它只是单次会话的审计，
+        /// 真正的"重复导出零改动"由各注入器的文件内容比对保证。0 表示本次没有任何改动。
+        /// </summary>
+        internal int AppliedCount => AppliedKeys.Count;
+
         public CExportSession(CExportPlatform platform, string exportRoot, CExportConfig config)
         {
             Platform = platform;
@@ -41,14 +48,11 @@ namespace CoffeeBean
             Config = config ?? new CExportConfig();
         }
 
-        /// <summary>记录某注入已被应用（幂等跳过依据）。</summary>
+        /// <summary>记录某注入已被应用（单次会话审计；幂等由文件内容比对保证）。</summary>
         public void MarkApplied(string key)
         {
             if (!string.IsNullOrEmpty(key)) AppliedKeys.Add(key);
         }
-
-        /// <summary>该注入是否已应用。</summary>
-        public bool WasApplied(string key) => key != null && AppliedKeys.Contains(key);
 
         /// <summary>把相对导出根的路径解析为绝对路径（规范化分隔符）。</summary>
         public string Resolve(string relativePath)

@@ -38,7 +38,9 @@ namespace CoffeeBean
                            .ToList();
             foreach (var step in builtins) ExecuteStep(session, step);
 
-            session.Log.Info($"完成：共 {session.Log.Entries.Count - 1} 条记录。");
+            session.Log.Info($"完成：共 {session.Log.Entries.Count - 1} 条记录，" +
+                             $"应用注入 {session.AppliedCount} 项" +
+                             (session.AppliedCount == 0 ? "（完全幂等：本次无改动）" : ""));
             return true;
         }
 

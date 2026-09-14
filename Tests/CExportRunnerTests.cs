@@ -104,6 +104,28 @@ namespace CoffeeBean.Build.Tests
         }
 
         [Test]
+        public void Run_LogsAppliedInjectionCount_AndMarksFullIdempotenceOnRerun()
+        {
+            WriteLauncherManifest();
+            WriteUnityManifest();
+            WriteFile("unityLibrary/build.gradle", "apply plugin: 'x'\ndependencies {\n}\n");
+            WriteFile("gradle.properties", "");
+
+            var s1 = new CExportSession(CExportPlatform.Android, Root, AndroidConfig());
+            CExportRunner.Run(s1);
+            string first = s1.Log.ToText();
+            StringAssert.Contains("应用注入", first, "完成日志应给出本次应用的注入项数");
+            StringAssert.DoesNotContain("完全幂等", first, "首次运行有改动，不应标记为完全幂等");
+
+            // 第二次运行：所有注入都已存在 → 零改动，日志应直接标出完全幂等
+            var s2 = new CExportSession(CExportPlatform.Android, Root, AndroidConfig());
+            CExportRunner.Run(s2);
+            string second = s2.Log.ToText();
+            StringAssert.Contains("应用注入 0 项", second, "幂等重跑应报告 0 项注入");
+            StringAssert.Contains("完全幂等", second, "幂等重跑应标记为完全幂等");
+        }
+
+        [Test]
         public void CustomStep_RunsBeforeBuiltins_CanMutateConfig()
         {
             WriteLauncherManifest();

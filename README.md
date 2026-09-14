@@ -33,7 +33,7 @@ CoffeeBean 原生导出定制模块：处理 **Android Studio（Gradle）工程*
 // Packages/manifest.json
 {
   "dependencies": {
-    "com.coffeebean.build": "https://github.com/Herschy0829/com.coffeebean.build.git#v0.1.2"
+    "com.coffeebean.build": "https://github.com/Herschy0829/com.coffeebean.build.git#v0.2.0"
   }
 }
 ```
