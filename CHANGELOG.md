@@ -1,5 +1,33 @@
 # Changelog
 
+## [0.3.0] - 2026-09-17
+
+### Added
+- **框架级必需 Gradle 依赖落盘 `CAndroidRequiredDeps`**：作为「谁需要 / 谁来写」里**首选的写入方**，
+  把各模块登记的需求（`CAndroidGradleRequirements`）注入 `unityLibrary/build.gradle` 的
+  `dependencies { }`，内部复用既有的 `CGradleFile.Inject`（行级幂等）。
+  失败只告警不抛出 —— 依赖缺失应由运行时接口暴露，而不是让打包直接失败。
+
+### Changed
+- **`ExportBuildCallbacks.OnPostGenerateGradleAndroidProject` 先做框架必需依赖注入**，
+  且这一步**不受导出配置门控**。
+
+  ⚠️ 这点很关键：原回调在没有 `Assets/CoffeeBean/ExportConfig.asset` 时是直接 warning + return 的
+  （管线也不在 Android 段未启用时执行）。若把必需依赖塞进那条管线，**没配过导出定制的工程就会
+  静默漏依赖**，表现成"应用内评价在真机上永远返回 Unavailable"。所以必需依赖走独立入口，
+  每次 Android 导出/构建都执行。
+
+### 与 tools 的分工
+- 装了 build → 由本模块写（首选；有导出日志、与既有 Gradle 注入实现一致）；
+- 没装 build → tools 的 `CAndroidGradleDependencyFallback` 自己写。
+  它靠探测 `CoffeeBean.CAndroidRequiredDeps` 这个类型来决定要不要兜底，
+  因此**旧版 build**（还没有该类型）在场时也会正确兜底。
+
+### Tests
+- 新增 `CAndroidRequiredDepsTests`（11 个用例）：注入 / 幂等 / 多依赖 / 空白与空串过滤
+  （否则会写出 `implementation ''` 这种坏行）/ 缺文件只告警不报错 / 空清单不动文件 /
+  日志含「为什么需要」/ 常量契约 / 不碰无关文件。
+
 ## [0.2.0] - 2026-09-14
 
 ### Fixed

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
 using UnityEditor.Android;
@@ -22,7 +23,31 @@ namespace CoffeeBean.EditorTools
 
         public void OnPostGenerateGradleAndroidProject(string exportPath)
         {
+            InjectFrameworkRequiredDeps(exportPath);
             RunForPlatform(CExportPlatform.Android, exportPath);
+        }
+
+        /// <summary>
+        /// 框架级必需 Gradle 依赖（与用户导出配置**无关**，因此不能放进配置门控的管线）：
+        /// 各模块通过 <see cref="CAndroidGradleRequirements"/> 登记自己需要什么，
+        /// 例如 tools 的应用内评价需要 <c>com.google.android.play:review</c>。
+        /// 没配置导出资产的工程同样会执行这里，避免"漏了依赖 → 真机功能静默失效"。
+        /// </summary>
+        static void InjectFrameworkRequiredDeps(string exportRoot)
+        {
+            try
+            {
+                IReadOnlyList<CAndroidGradleRequirement> requirements = CAndroidGradleRequirements.ResolveForBuild();
+                if (requirements == null || requirements.Count == 0) return;
+
+                var log = new CExportLog();
+                CAndroidRequiredDeps.Inject(exportRoot, requirements, log);
+                log.FlushToConsole("CoffeeBean.Build");
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning($"[CoffeeBean.Build] 注入框架必需 Gradle 依赖失败（不阻断构建）：{e.Message}");
+            }
         }
 
         /// <summary>iOS：导出 Xcode 工程后触发（mac；Windows 上 iOS 构建不可用不触发）。</summary>

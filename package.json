@@ -1,6 +1,6 @@
 {
   "name": "com.coffeebean.build",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "displayName": "CoffeeBean Build",
   "description": "Native export customization for CoffeeBean: post-process Android Studio (Gradle) & iOS (Xcode) project exports — AndroidManifest / gradle / gradle.properties / libs / res / env injection for Android; Info.plist / frameworks & libs / Build Settings / capabilities / file targets for iOS. Pure-C# injectors (EditMode testable) + thin Unity callback adapters; idempotent; dry-run; config via ScriptableObject/JSON/code steps.",
   "unity": "6000.0",
